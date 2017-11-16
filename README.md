@@ -1,2 +1,3 @@
 # packer-freebsd
-Packer template for FreeBSD
+
+Packer template for FreeBSD.

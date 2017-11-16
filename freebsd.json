@@ -1,0 +1,159 @@
+{
+	"variables": {
+		"build_name": "FreeBSD-11.1",
+		"build_memory": "2048",
+		"build_cpu_cores": "4",
+		"final_memory": "1024",
+		"final_cpu_cores": "2",
+		"disk_size": "40960",
+		"headless": "true",
+		"iso_checksum_type": "sha256",
+		"iso_checksum": "ff4c749ea0aaaceedb2432ba3e0fd0c1b64f5a72141b1ec06b9ced52b5de0dbf",
+		"iso_url": "https://download.freebsd.org/ftp/releases/ISO-IMAGES/11.1/FreeBSD-11.1-RELEASE-amd64-disc1.iso",
+		"ssh_username": "vagrant",
+		"ssh_password": "vagrant",
+		"root_password": "vagrant",
+		"hostname": "vagrant-freebsd"
+	},
+	"builders": [
+		{
+			"name": "{{user `build_name`}}-vmware",
+			"vm_name": "{{user `build_name`}}-vmware",
+			"type": "vmware-iso",
+			"iso_url": "https://download.freebsd.org/ftp/releases/ISO-IMAGES/11.1/FreeBSD-11.1-RELEASE-amd64-disc1.iso",
+			"iso_checksum_type": "{{ user `iso_checksum_type` }}",
+			"iso_checksum": "{{ user `iso_checksum` }}",
+			"boot_wait": "40s",
+			"boot_command": [
+				"<enter><wait><wait><enter>{{ user `hostname` }}<enter><enter>",
+				"a<enter><wait><wait>t<enter><enter><spacebar><enter><leftShiftOn>.<leftShiftOff><enter>y",
+				"<wait10><wait10><wait10><wait10><wait10><wait10><wait10>",
+				"{{ user `root_password` }}<enter>{{ user `root_password` }}<enter><wait5><enter><wait>",
+				"y<wait>y<wait10>",
+				"y<wait>y<wait10><wait10><enter><wait>",
+				"a<wait><enter><wait>y<wait>",
+				"s<wait>s<wait>",
+				"n<spacebar>",
+				"d<spacebar><enter><wait>",
+				"<spacebar><down><spacebar><down><spacebar><down><spacebar><down><spacebar><down><spacebar><down><spacebar><down><spacebar><down><spacebar><enter><wait>",
+				"<enter><wait>{{ user `ssh_username` }}<enter>{{ user `ssh_username` }}<enter><enter><enter>wheel<enter><enter><enter><enter><enter><enter><enter><enter><wait>{{ user `ssh_password` }}<enter>{{ user `ssh_password` }}<enter><enter>yes<enter>no<enter><wait>",
+				"<enter><wait>y<wait>echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config<enter><wait>exit<enter><wait><enter>"
+			],
+			"disk_size": "{{user `disk_size`}}",
+			"headless": "{{ user `headless` }}",
+			"ssh_username": "root",
+			"ssh_password": "{{ user `root_password` }}",
+			"ssh_wait_timeout": "15m",
+			"shutdown_command": "poweroff",
+			 "vmx_data": {
+				"cpuid.coresPerSocket": "1",
+				"memsize": "{{user `build_memory`}}",
+				"numvcpus": "{{user `build_cpu_cores`}}",
+				"ethernet0.addresstype": "generated",
+				"ethernet0.bsdname": "en0",
+				"ethernet0.connectiontype": "nat",
+				"ethernet0.displayname": "Ethernet",
+				"ethernet0.linkstatepropagation.enable": "FALSE",
+				"ethernet0.pcislotnumber": "32",
+				"ethernet0.present": "TRUE",
+				"ethernet0.virtualdev": "e1000",
+				"ethernet0.wakeonpcktrcv": "FALSE"
+			},
+			"vmx_data_post": {
+				"cpuid.coresPerSocket": "1",
+				"memsize": "{{user `final_memory`}}",
+				"numvcpus": "{{user `final_cpu_cores`}}"
+			}
+		},
+		{
+			"name": "{{user `build_name`}}-virtualbox",
+			"vm_name": "{{user `build_name`}}-virtualbox",
+			"type": "virtualbox-iso",
+			"iso_url": "https://download.freebsd.org/ftp/releases/ISO-IMAGES/11.1/FreeBSD-11.1-RELEASE-amd64-disc1.iso",
+			"iso_checksum_type": "{{ user `iso_checksum_type` }}",
+			"iso_checksum": "{{ user `iso_checksum` }}",
+			"boot_wait": "40s",
+			"boot_command": [
+				"<enter><wait><wait><enter>{{ user `hostname` }}<enter><enter>",
+				"a<enter><wait><wait>t<enter><enter><spacebar><enter><leftShiftOn>.<leftShiftOff><enter>y",
+				"<wait10><wait10><wait10><wait10><wait10><wait10><wait10>",
+				"{{ user `root_password` }}<enter>{{ user `root_password` }}<enter><wait5><enter><wait>",
+				"y<wait>y<wait10>",
+				"y<wait>y<wait10><wait10><enter><wait>",
+				"a<wait><enter><wait>y<wait>",
+				"s<wait>s<wait>",
+				"n<spacebar>",
+				"d<spacebar><enter><wait>",
+				"<spacebar><down><spacebar><down><spacebar><down><spacebar><down><spacebar><down><spacebar><down><spacebar><down><spacebar><down><spacebar><enter><wait>",
+				"<enter><wait>{{ user `ssh_username` }}<enter>{{ user `ssh_username` }}<enter><enter><enter>wheel<enter><enter><enter><enter><enter><enter><enter><enter><wait>{{ user `ssh_password` }}<enter>{{ user `ssh_password` }}<enter><enter>yes<enter>no<enter><wait>",
+				"<enter><wait>y<wait>echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config<enter><wait>exit<enter><wait><enter>"
+			],
+			"disk_size": "{{user `disk_size`}}",
+			"headless": "{{ user `headless` }}",
+			"ssh_username": "root",
+			"ssh_password": "{{ user `root_password` }}",
+			"ssh_wait_timeout": "15m",
+			"shutdown_command": "poweroff",
+			"vboxmanage": [
+				[
+					"modifyvm",
+					"{{.Name}}",
+					"--memory",
+					"{{user `build_memory`}}"
+				],
+				[
+					"modifyvm",
+					"{{.Name}}",
+					"--cpus",
+					"{{user `build_cpu_cores`}}"
+				]
+			],
+			"vboxmanage_post": [
+				[
+					"modifyvm",
+					"{{.Name}}",
+					"--memory",
+					"{{user `final_memory`}}"
+				],
+				[
+					"modifyvm",
+					"{{.Name}}",
+					"--cpus",
+					"{{user `final_cpu_cores`}}"
+				]
+			],
+			"virtualbox_version_file": ".vbox_version"
+		}
+	],
+	"provisioners": [
+		{
+			"type": "shell",
+			"execute_command": "/bin/sh {{ .Path }}",
+			"script": "scripts/vagrant.sh"
+		},
+		{
+			"only": ["{{user `build_name`}}-vmware"],
+			"type": "shell",
+			"execute_command": "/bin/sh {{ .Path }}",
+			"script": "scripts/vmware.sh"
+		},
+		{
+			"only": ["{{user `build_name`}}-virtualbox"],
+			"type": "shell",
+			"execute_command": "/bin/sh {{ .Path }}",
+			"script": "scripts/virtualbox.sh"
+		},
+		{
+			"type": "shell",
+			"execute_command": "/bin/sh {{ .Path }}",
+			"script": "scripts/cleanup.sh"
+		}
+	],
+	"post-processors": [
+		{
+			"type": "vagrant",
+			"keep_input_artifact": true,
+			"output": "{{.BuildName}}.box"
+		}
+	]
+}
